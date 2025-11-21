@@ -1,5 +1,4 @@
-package com.Incident.Management.model;
-
+package com.Incident.Management.incident_manager.model;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

@@ -1,4 +1,4 @@
-package com.Incident.Management.model;
+package com.Incident.Management.incident_manager.model;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -79,4 +79,3 @@ public class Incident {
     @Transient
     private Double meanTimeToResolve = 60.0;
 }
-

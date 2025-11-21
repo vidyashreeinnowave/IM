@@ -1,29 +1,32 @@
-package com.Incident.Management.model;
+package com.Incident.Management.incident_manager.model;
 
-
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "incident_priority")
+@Table(name = "incident_team")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class IncidentPriority {
+public class IncidentTeam {
 @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer priorityId;
+    private Long id;
 
-    @Column(nullable = false, unique = true, length = 2)
-    private String priorityCode;
+    @ManyToOne
+    @JoinColumn(name = "incident_number")
+    private Incident incident;
 
-    private String description;
+    @ManyToOne
+    @JoinColumn(name = "team_id")
+    private Team team;
 }
 

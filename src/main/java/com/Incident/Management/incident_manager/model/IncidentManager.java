@@ -1,4 +1,4 @@
-package com.Incident.Management.model;
+package com.Incident.Management.incident_manager.model;
 import java.util.ArrayList;
 import java.util.List;
 
