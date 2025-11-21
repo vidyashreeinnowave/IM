@@ -14,10 +14,11 @@ public class IncidentStatusLoader {
     CommandLineRunner loadStatuses(IncidentStatusRepository repo) {
         return args -> {
             if (repo.count() == 0) {
-                repo.save(new IncidentStatus(null, "OPEN", "Incident is newly created"));
-                repo.save(new IncidentStatus(null, "IN_PROGRESS", "Being investigated"));
-                repo.save(new IncidentStatus(null, "RESOLVED", "Issue has been fixed"));
-                repo.save(new IncidentStatus(null, "CLOSED", "Incident is closed"));
+                repo.save(new IncidentStatus(null, "Open", "Incident is newly created"));
+                repo.save(new IncidentStatus(null, "On going", "Incident is currently in progress"));
+                repo.save(new IncidentStatus(null, "Resolved", "Issue has been fixed"));
+                repo.save(new IncidentStatus(null, "Closed", "Incident is closed"));
+
             }
         };
     }
