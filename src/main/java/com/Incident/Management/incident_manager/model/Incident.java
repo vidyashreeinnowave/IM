@@ -16,7 +16,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -66,16 +65,4 @@ public class Incident {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-
-    /** Static / transient placeholders */
-    @Transient
-    private String managerName = "Ravi Kumar";
-    @Transient
-    private String managerId = "MGR001";
-
-    @Transient
-    private Double meanTimeToEngage = 10.0;
-
-    @Transient
-    private Double meanTimeToResolve = 60.0;
 }

@@ -149,6 +149,23 @@ public class IncidentService {
     public void deleteIncident(String incidentNumber) {
         incidentRepo.deleteById(incidentNumber);
     }
+    private Double calculateMTTE(Incident incident) {
+    if (incident.getOutageStart() == null || incident.getCrisisStart() == null) {
+        return null;
+    }
+
+    long minutes = (incident.getCrisisStart().getTime() - incident.getOutageStart().getTime()) / (1000 * 60);
+    return (double) minutes;
+}
+
+private Double calculateMTTR(Incident incident) {
+    if (incident.getCrisisStart() == null || incident.getCrisisEnd() == null) {
+        return null;
+    }
+
+    long minutes = (incident.getCrisisEnd().getTime() - incident.getCrisisStart().getTime()) / (1000 * 60);
+    return (double) minutes;
+}
 
     // -------------------------------
     // ENTITY → DTO MAPPER
@@ -161,8 +178,8 @@ public class IncidentService {
         dto.setPriorityDescription(incident.getIncidentPriority().getDescription());
         dto.setStatusName(incident.getStatus().getStatusName());
         dto.setStatusDescription(incident.getStatus().getDescription());
-        dto.setManagerId(incident.getManagerId());
-        dto.setManagerName(incident.getManagerName());
+        dto.setManagerId(incident.getIncidentManager() != null ? incident.getIncidentManager().getManagerId() : null);
+dto.setManagerName(incident.getIncidentManager() != null ? incident.getIncidentManager().getManagerName() : null);
         dto.setOutageStart(incident.getOutageStart());
         dto.setCrisisStart(incident.getCrisisStart());
         dto.setCrisisEnd(incident.getCrisisEnd());
@@ -172,8 +189,8 @@ public class IncidentService {
         dto.setDebriefSummary(incident.getDebriefSummary());
         dto.setDebriefTime(incident.getDebriefTime());
         dto.setProblemTicketNumber(incident.getProblemTicketNumber());
-        dto.setMeanTimeToEngage(incident.getMeanTimeToEngage());
-        dto.setMeanTimeToResolve(incident.getMeanTimeToResolve());
+        dto.setMeanTimeToEngage(calculateMTTE(incident));
+dto.setMeanTimeToResolve(calculateMTTR(incident));
 
         dto.setImpactedApps(
     incident.getImpactedApplications().stream()

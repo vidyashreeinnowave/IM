@@ -27,7 +27,7 @@ public class IncidentManager {
     private String managerId;
 
     @Column(name = "manager_name", nullable = false)
-    private String name;
+    private String managerName;
 
     @ManyToOne
     @JoinColumn(name = "team_id", nullable = false)
