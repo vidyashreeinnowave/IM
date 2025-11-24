@@ -83,6 +83,43 @@ public class IncidentController {
     public ResponseEntity<KpiDashboardDTO> getDashboard() {
         return ResponseEntity.ok(kpiService.getKpiDashboard());
     }
+    @GetMapping("/filter")
+public ResponseEntity<List<IncidentResponseDTO>> filterIncidents(
+
+        // Time period
+        @RequestParam(required = false) Integer days,
+        @RequestParam(required = false) String startDate,
+        @RequestParam(required = false) String endDate,
+
+        // Priority
+        @RequestParam(required = false) List<String> priority,
+
+        // Status
+        @RequestParam(required = false) List<String> status,
+
+        // Incident Manager
+        @RequestParam(required = false) List<String> managerId,
+
+        // Impacted Application
+        @RequestParam(required = false) List<String> impactedApp,
+
+        // Root Cause Application
+        @RequestParam(required = false) List<String> rootCauseApp,
+
+        // Team(s)
+        @RequestParam(required = false) List<Integer> teamId,
+
+        // Problem Ticket
+        @RequestParam(required = false) String problemTicket
+) {
+    return ResponseEntity.ok(
+            incidentService.filterIncidents(days, startDate, endDate,
+                    priority, status, managerId,
+                    impactedApp, rootCauseApp,
+                    teamId, problemTicket)
+    );
+}
+
 }
 
 

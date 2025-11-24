@@ -1,5 +1,7 @@
 package com.Incident.Management.incident_manager.service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -197,8 +199,109 @@ dto.setMeanTimeToResolve(calculateMTTR(incident));
         .map(ia -> ia.getApplication().getAppName())
         .toList()
 );
-
-
         return dto;
     }
+
+    public List<IncidentResponseDTO> filterIncidents(
+        Integer days,
+        String startDate,
+        String endDate,
+        List<String> priority,
+        List<String> status,
+        List<String> managerId,
+        List<String> impactedApp,
+        List<String> rootCauseApp,
+        List<Integer> teamId,
+        String problemTicket
+) {
+
+    List<Incident> incidents = incidentRepo.findAll();
+
+    // Time filter: last X days
+    if (days != null) {
+        LocalDateTime threshold = LocalDateTime.now().minusDays(days);
+        incidents = incidents.stream()
+                .filter(i -> i.getCreatedAt().isAfter(threshold))
+                .toList();
+    }
+
+    // Custom date range
+    if (startDate != null && endDate != null) {
+        LocalDateTime start = LocalDate.parse(startDate).atStartOfDay();
+        LocalDateTime end = LocalDate.parse(endDate).atTime(23, 59);
+
+        incidents = incidents.stream()
+                .filter(i -> i.getCreatedAt().isAfter(start) &&
+                             i.getCreatedAt().isBefore(end))
+                .toList();
+    }
+
+    // Priority filter
+    if (priority != null) {
+        incidents = incidents.stream()
+                .filter(i -> priority.contains(
+                        i.getIncidentPriority().getPriorityCode()))
+                .toList();
+    }
+
+    // Status filter
+    if (status != null) {
+        incidents = incidents.stream()
+                .filter(i -> status.contains(
+                        i.getStatus().getStatusName()))
+                .toList();
+    }
+
+    // Manager filter
+    if (managerId != null) {
+        incidents = incidents.stream()
+                .filter(i -> i.getIncidentManager() != null &&
+                             managerId.contains(i.getIncidentManager().getManagerId()))
+                .toList();
+    }
+
+    // Impacted Applications filter
+    if (impactedApp != null) {
+        incidents = incidents.stream()
+                .filter(i -> i.getImpactedApplications().stream()
+                        .anyMatch(app -> impactedApp.contains(app.getApplication().getAppName())))
+                .toList();
+    }
+
+    // Root cause application
+    if (rootCauseApp != null) {
+        incidents = incidents.stream()
+                .filter(i -> i.getRootCauseApp() != null &&
+                             rootCauseApp.contains(i.getRootCauseApp().getAppName()))
+                .toList();
+    }
+
+    // Team filter
+    if (teamId != null) {
+        incidents = incidents.stream()
+                .filter(i -> i.getIncidentManager() != null &&
+                             teamId.contains(i.getIncidentManager().getTeam().getTeamId()))
+                .toList();
+    }
+
+    // Problem Ticket filter
+    if (problemTicket != null) {
+        if ("yes".equalsIgnoreCase(problemTicket)) {
+            incidents = incidents.stream()
+                    .filter(i -> i.getProblemTicketNumber() != null &&
+                                 !i.getProblemTicketNumber().isBlank())
+                    .toList();
+        } else if ("no".equalsIgnoreCase(problemTicket)) {
+            incidents = incidents.stream()
+                    .filter(i -> i.getProblemTicketNumber() == null ||
+                                 i.getProblemTicketNumber().isBlank())
+                    .toList();
+        }
+    }
+
+    return incidents.stream()
+            .map(this::mapToDTO)
+            .toList();
+}
+
 }
