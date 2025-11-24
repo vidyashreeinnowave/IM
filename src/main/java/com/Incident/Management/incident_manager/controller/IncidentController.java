@@ -15,8 +15,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.Incident.Management.incident_manager.dto.IncidentRequestDTO;
 import com.Incident.Management.incident_manager.dto.IncidentResponseDTO;
+import com.Incident.Management.incident_manager.dto.KpiDashboardDTO;
 import com.Incident.Management.incident_manager.dto.ManagerStatsDTO;
 import com.Incident.Management.incident_manager.service.IncidentService;
+import com.Incident.Management.incident_manager.service.KpiDashboardService;
 import com.Incident.Management.incident_manager.service.ManagerStatsService;
 
 @RestController
@@ -25,10 +27,12 @@ public class IncidentController {
 
     private final IncidentService incidentService;
     private final ManagerStatsService statsService;
+    private final KpiDashboardService kpiService;
 
-    public IncidentController(IncidentService incidentService, ManagerStatsService statsService) {
+    public IncidentController(IncidentService incidentService, ManagerStatsService statsService, KpiDashboardService kpiService) {
     this.incidentService = incidentService;
     this.statsService = statsService;
+    this.kpiService = kpiService;
 }
 
     // GET ALL incidents (OPTIONAL pagination)
@@ -73,6 +77,11 @@ public class IncidentController {
     @GetMapping("/stats")
     public ResponseEntity<List<ManagerStatsDTO>> getStats() {
         return ResponseEntity.ok(statsService.getManagerStats());
+    }
+
+    @GetMapping("/kpi")
+    public ResponseEntity<KpiDashboardDTO> getDashboard() {
+        return ResponseEntity.ok(kpiService.getKpiDashboard());
     }
 }
 
