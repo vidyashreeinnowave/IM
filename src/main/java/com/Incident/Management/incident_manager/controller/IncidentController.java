@@ -1,5 +1,8 @@
 package com.Incident.Management.incident_manager.controller;
 
+import java.util.List;
+
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,17 +15,21 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.Incident.Management.incident_manager.dto.IncidentRequestDTO;
 import com.Incident.Management.incident_manager.dto.IncidentResponseDTO;
+import com.Incident.Management.incident_manager.dto.ManagerStatsDTO;
 import com.Incident.Management.incident_manager.service.IncidentService;
+import com.Incident.Management.incident_manager.service.ManagerStatsService;
 
 @RestController
 @RequestMapping("/api/incidents")
 public class IncidentController {
 
     private final IncidentService incidentService;
+    private final ManagerStatsService statsService;
 
-    public IncidentController(IncidentService incidentService) {
-        this.incidentService = incidentService;
-    }
+    public IncidentController(IncidentService incidentService, ManagerStatsService statsService) {
+    this.incidentService = incidentService;
+    this.statsService = statsService;
+}
 
     // GET ALL incidents (OPTIONAL pagination)
     @GetMapping
@@ -60,6 +67,12 @@ public class IncidentController {
     @DeleteMapping("/{incidentNumber}")
     public void delete(@PathVariable String incidentNumber) {
         incidentService.deleteIncident(incidentNumber);
+    }
+
+    //Stats for IM Efficinecy Leaderboard
+    @GetMapping("/stats")
+    public ResponseEntity<List<ManagerStatsDTO>> getStats() {
+        return ResponseEntity.ok(statsService.getManagerStats());
     }
 }
 
