@@ -13,10 +13,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.Incident.Management.incident_manager.dto.IncidentManagerResponseDTO;
 import com.Incident.Management.incident_manager.dto.IncidentRequestDTO;
 import com.Incident.Management.incident_manager.dto.IncidentResponseDTO;
 import com.Incident.Management.incident_manager.dto.KpiDashboardDTO;
 import com.Incident.Management.incident_manager.dto.ManagerStatsDTO;
+import com.Incident.Management.incident_manager.service.IncidentManagerService;
 import com.Incident.Management.incident_manager.service.IncidentService;
 import com.Incident.Management.incident_manager.service.KpiDashboardService;
 import com.Incident.Management.incident_manager.service.ManagerStatsService;
@@ -28,11 +30,13 @@ public class IncidentController {
     private final IncidentService incidentService;
     private final ManagerStatsService statsService;
     private final KpiDashboardService kpiService;
+    private final IncidentManagerService incidentManagerService;
 
-    public IncidentController(IncidentService incidentService, ManagerStatsService statsService, KpiDashboardService kpiService) {
+    public IncidentController(IncidentService incidentService, ManagerStatsService statsService, KpiDashboardService kpiService, IncidentManagerService incidentManagerService) {
     this.incidentService = incidentService;
     this.statsService = statsService;
     this.kpiService = kpiService;
+    this.incidentManagerService = incidentManagerService;
 }
 
     // GET ALL incidents (OPTIONAL pagination)
@@ -138,6 +142,10 @@ public ResponseEntity<List<ManagerStatsDTO>> getFilteredStats(
             endDate
     );
     return ResponseEntity.ok(filteredStats);
+}
+@GetMapping("/incident-managers")
+public ResponseEntity<List<IncidentManagerResponseDTO>> getAllIncidentManagers() {
+    return ResponseEntity.ok(incidentManagerService.getAllIncidentManagers());
 }
 
 }

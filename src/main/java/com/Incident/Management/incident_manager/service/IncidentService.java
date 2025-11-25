@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import com.Incident.Management.incident_manager.dto.ImpactedApplicationResponseDTO;
 import com.Incident.Management.incident_manager.dto.IncidentRequestDTO;
 import com.Incident.Management.incident_manager.dto.IncidentResponseDTO;
 import com.Incident.Management.incident_manager.model.Application;
@@ -169,38 +170,55 @@ private Double calculateMTTR(Incident incident) {
     return (double) minutes;
 }
 
-    // -------------------------------
-    // ENTITY → DTO MAPPER
-    // -------------------------------
-    private IncidentResponseDTO mapToDTO(Incident incident) {
-        IncidentResponseDTO dto = new IncidentResponseDTO();
+   private IncidentResponseDTO mapToDTO(Incident incident) {
 
-        dto.setIncidentNumber(incident.getIncidentNumber());
-        dto.setPriorityCode(incident.getIncidentPriority().getPriorityCode());
-        dto.setPriorityDescription(incident.getIncidentPriority().getDescription());
-        dto.setStatusName(incident.getStatus().getStatusName());
-        dto.setStatusDescription(incident.getStatus().getDescription());
-        dto.setManagerId(incident.getIncidentManager() != null ? incident.getIncidentManager().getManagerId() : null);
-dto.setManagerName(incident.getIncidentManager() != null ? incident.getIncidentManager().getManagerName() : null);
-        dto.setOutageStart(incident.getOutageStart());
-        dto.setCrisisStart(incident.getCrisisStart());
-        dto.setCrisisEnd(incident.getCrisisEnd());
-        dto.setWarRoomLink(incident.getWarRoomLink());
-        dto.setRootCauseReason(incident.getRootCauseReason());
-        dto.setDebriefLink(incident.getDebriefLink());
-        dto.setDebriefSummary(incident.getDebriefSummary());
-        dto.setDebriefTime(incident.getDebriefTime());
-        dto.setProblemTicketNumber(incident.getProblemTicketNumber());
-        dto.setMeanTimeToEngage(calculateMTTE(incident));
-dto.setMeanTimeToResolve(calculateMTTR(incident));
+    IncidentResponseDTO dto = new IncidentResponseDTO();
 
-        dto.setImpactedApps(
-    incident.getImpactedApplications().stream()
-        .map(ia -> ia.getApplication().getAppName())
-        .toList()
-);
-        return dto;
+    // Basic fields
+    dto.setIncidentNumber(incident.getIncidentNumber());
+    dto.setOutageStart(incident.getOutageStart());
+    dto.setCrisisStart(incident.getCrisisStart());
+    dto.setCrisisEnd(incident.getCrisisEnd());
+    dto.setWarRoomLink(incident.getWarRoomLink());
+    dto.setRootCauseReason(incident.getRootCauseReason());
+    dto.setDebriefLink(incident.getDebriefLink());
+    dto.setDebriefSummary(incident.getDebriefSummary());
+    dto.setDebriefTime(incident.getDebriefTime());
+    dto.setProblemTicketNumber(incident.getProblemTicketNumber());
+    dto.setDebriefAttachmentPath(incident.getDebriefAttachmentPath());
+    dto.setCreatedAt(incident.getCreatedAt());
+    dto.setUpdatedAt(incident.getUpdatedAt());
+
+    // Manager details
+    if (incident.getIncidentManager() != null) {
+        dto.setManagerId(incident.getIncidentManager().getManagerId());
+        dto.setManagerName(incident.getIncidentManager().getManagerName());
     }
+
+    // FULL PRIORITY OBJECT
+    dto.setIncidentPriority(incident.getIncidentPriority());
+
+    // FULL STATUS OBJECT
+    dto.setStatus(incident.getStatus());
+
+    // FULL ROOT CAUSE APPLICATION
+    dto.setRootCauseApp(incident.getRootCauseApp());
+
+    // FULL IMPACTED APPLICATIONS LIST
+    dto.setImpactedApplications(
+            incident.getImpactedApplications()
+                    .stream()
+                    .map(ImpactedApplicationResponseDTO::fromEntity)
+                    .toList()
+    );
+
+    // Calculated fields
+    dto.setMeanTimeToEngage(calculateMTTE(incident));
+    dto.setMeanTimeToResolve(calculateMTTR(incident));
+
+    return dto;
+}
+
 
     public List<IncidentResponseDTO> filterIncidents(
         Integer days,
