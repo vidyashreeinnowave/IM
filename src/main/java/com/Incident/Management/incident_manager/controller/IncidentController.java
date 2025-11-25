@@ -75,9 +75,10 @@ public class IncidentController {
 
     //Stats for IM Efficinecy Leaderboard
     @GetMapping("/stats")
-    public ResponseEntity<List<ManagerStatsDTO>> getStats() {
-        return ResponseEntity.ok(statsService.getManagerStats());
-    }
+public ResponseEntity<List<ManagerStatsDTO>> getStats() {
+    return ResponseEntity.ok(statsService.getManagerStats(null, null, null));
+}
+
 
     @GetMapping("/kpi")
     public ResponseEntity<KpiDashboardDTO> getDashboard() {
@@ -118,6 +119,25 @@ public ResponseEntity<List<IncidentResponseDTO>> filterIncidents(
                     impactedApp, rootCauseApp,
                     teamId, problemTicket)
     );
+}
+@GetMapping("stats/filter")
+public ResponseEntity<List<ManagerStatsDTO>> getFilteredStats(
+        @RequestParam(required = false) String performanceFilter, // Green/Yellow/Red
+        @RequestParam(required = false) String complianceFilter,  // Compliant/Non-Compliant
+        @RequestParam(required = false) Integer minIncidentCount, // Numeric minimum
+        @RequestParam(required = false) Integer days,            // e.g., last 7, 30, 90 days
+        @RequestParam(required = false) String startDate,        // custom start date, format: yyyy-MM-dd
+        @RequestParam(required = false) String endDate           // custom end date, format: yyyy-MM-dd
+) {
+    List<ManagerStatsDTO> filteredStats = statsService.getFilteredStats(
+            performanceFilter,
+            complianceFilter,
+            minIncidentCount,
+            days,
+            startDate,
+            endDate
+    );
+    return ResponseEntity.ok(filteredStats);
 }
 
 }
