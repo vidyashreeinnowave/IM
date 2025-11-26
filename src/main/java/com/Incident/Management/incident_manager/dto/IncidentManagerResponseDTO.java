@@ -10,4 +10,6 @@ public class IncidentManagerResponseDTO {
     private String name;
     private TeamDTO team;
     private List<IncidentResponseDTO> incidents;
+    private Double meanTimeToEngage;
+    private Double meanTimeToResolve;
 }

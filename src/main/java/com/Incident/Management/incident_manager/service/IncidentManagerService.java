@@ -1,13 +1,14 @@
 package com.Incident.Management.incident_manager.service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
 import com.Incident.Management.incident_manager.dto.IncidentManagerResponseDTO;
-import com.Incident.Management.incident_manager.dto.TeamDTO;
 import com.Incident.Management.incident_manager.dto.IncidentResponseDTO;
+import com.Incident.Management.incident_manager.dto.TeamDTO;
 import com.Incident.Management.incident_manager.model.IncidentManager;
 import com.Incident.Management.incident_manager.repository.IncidentManagerRepository;
 
@@ -21,30 +22,49 @@ public class IncidentManagerService {
 
     public List<IncidentManagerResponseDTO> getAllIncidentManagers() {
         List<IncidentManager> managers = managerRepo.findAll();
-
-        return managers.stream().map(this::mapToDTO).collect(Collectors.toList());
+        return managers.stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
     }
 
     private IncidentManagerResponseDTO mapToDTO(IncidentManager manager) {
+
         IncidentManagerResponseDTO dto = new IncidentManagerResponseDTO();
         dto.setManagerId(manager.getManagerId());
         dto.setName(manager.getManagerName());
 
-        // Map team
+        // -------- TEAM ----------
         TeamDTO teamDTO = new TeamDTO();
         teamDTO.setTeamId(manager.getTeam().getTeamId().toString());
         teamDTO.setTeamName(manager.getTeam().getTeamName());
         dto.setTeam(teamDTO);
 
-        // Map incidents using your existing IncidentResponseDTO mapper
-        List<IncidentResponseDTO> incidentDTOs =
-                manager.getIncidents().stream()
-                        .map(IncidentResponseDTO::fromEntity)
-                        .collect(Collectors.toList());
+        // -------- INCIDENTS ----------
+        List<IncidentResponseDTO> incidentDTOs = manager.getIncidents().stream()
+                .map(IncidentResponseDTO::fromEntity)
+                .collect(Collectors.toList());
 
         dto.setIncidents(incidentDTOs);
+
+        // -------- CALCULATE MANAGER-LEVEL MTTE / MTTR -------------
+
+        double avgMTTE = incidentDTOs.stream()
+                .map(IncidentResponseDTO::getMeanTimeToEngage)
+                .filter(Objects::nonNull)
+                .mapToDouble(Double::doubleValue)
+                .average()
+                .orElse(0.0);
+
+        double avgMTTR = incidentDTOs.stream()
+                .map(IncidentResponseDTO::getMeanTimeToResolve)
+                .filter(Objects::nonNull)
+                .mapToDouble(Double::doubleValue)
+                .average()
+                .orElse(0.0);
+
+        dto.setMeanTimeToEngage(avgMTTE);
+        dto.setMeanTimeToResolve(avgMTTR);
 
         return dto;
     }
 }
-
