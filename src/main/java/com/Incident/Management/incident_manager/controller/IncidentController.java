@@ -177,10 +177,27 @@ public ResponseEntity<List<IncidentManagerResponseDTO>> getAllIncidentManagers()
         return applicationService.getAll();
     }
     @GetMapping("/priority-summary")
-public ResponseEntity<List<PrioritySummaryDTO>> getPrioritySummary() {
+    public ResponseEntity<List<PrioritySummaryDTO>> getPrioritySummary() {
     return ResponseEntity.ok(incidentService.getPrioritySummary());
-}
+    }
+    @GetMapping("/search")
+    public ResponseEntity<List<IncidentResponseDTO>> searchIncidents(
+            @RequestParam(required = false) String managerName,
+            @RequestParam(required = false) String managerId,
+            @RequestParam(required = false) String incidentNumber,
+            @RequestParam(required = false) String appName,
+            @RequestParam(required = false) String teamName
+    ) {
+        return ResponseEntity.ok(
+                incidentService.searchIncidents(managerName, managerId, incidentNumber, appName, teamName)
+        );
+    }
 
+    // Single keyword universal search
+    // @GetMapping("/search-all")
+    // public ResponseEntity<List<IncidentResponseDTO>> globalSearch(@RequestParam String keyword) {
+    //     return ResponseEntity.ok(incidentService.globalSearch(keyword));
+    // }
 }
 
 

@@ -46,7 +46,8 @@ public class IncidentResponseDTO {
     private Double meanTimeToEngage;
     private Double meanTimeToResolve;
 
-
+    private String teamId;
+    private String teamName;
     // -------------------------
     // STATIC MAPPER (IMPORTANT)
     // -------------------------
@@ -89,6 +90,8 @@ public class IncidentResponseDTO {
         if (incident.getIncidentManager() != null) {
             dto.setManagerName(incident.getIncidentManager().getManagerName());
             dto.setManagerId(incident.getIncidentManager().getManagerId());
+            dto.setTeamId(incident.getIncidentManager().getTeam().getTeamId());
+            dto.setTeamName(incident.getIncidentManager().getTeam().getTeamName());
         }
 
         // Compute MTTx if needed

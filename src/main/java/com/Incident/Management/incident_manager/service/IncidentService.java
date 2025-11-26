@@ -2,6 +2,7 @@ package com.Incident.Management.incident_manager.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -334,5 +335,41 @@ private Double calculateMTTR(Incident incident) {
 public List<PrioritySummaryDTO> getPrioritySummary() {
     return incidentRepo.getPrioritySummary();
 }
+public List<IncidentResponseDTO> searchIncidents(
+            String managerName,
+            String managerId,
+            String incidentNumber,
+            String appName,
+            String teamName
+    ) {
+        List<Incident> results = new ArrayList<>();
 
+        if (managerName != null)
+            results = incidentRepo.findByIncidentManager_ManagerNameContainingIgnoreCase(managerName);
+
+        else if (managerId != null)
+            results = incidentRepo.findByIncidentManager_ManagerId(managerId);
+
+        else if (incidentNumber != null)
+            results = incidentRepo.findByIncidentNumberContainingIgnoreCase(incidentNumber);
+
+        else if (appName != null)
+            results = incidentRepo.findByImpactedApplications_Application_AppNameContainingIgnoreCase(appName);
+
+        else if (teamName != null)
+            results = incidentRepo.findByIncidentManager_Team_TeamNameContainingIgnoreCase(teamName);
+
+        else
+            return List.of(); // empty list
+
+        return results.stream().map(IncidentResponseDTO::fromEntity).toList();
+    }
+
+    // Global search
+    public List<IncidentResponseDTO> globalSearch(String keyword) {
+        return incidentRepo.globalSearch(keyword)
+                .stream()
+                .map(IncidentResponseDTO::fromEntity)
+                .toList();
+    }
 }
