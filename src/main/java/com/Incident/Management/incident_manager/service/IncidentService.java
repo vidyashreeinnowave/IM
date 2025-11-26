@@ -17,6 +17,7 @@ import com.Incident.Management.incident_manager.model.Incident;
 import com.Incident.Management.incident_manager.model.IncidentPriority;
 import com.Incident.Management.incident_manager.model.IncidentStatus;
 import com.Incident.Management.incident_manager.repository.ApplicationRepository;
+import com.Incident.Management.incident_manager.repository.IncidentManagerRepository;
 import com.Incident.Management.incident_manager.repository.IncidentPriorityRepository;
 import com.Incident.Management.incident_manager.repository.IncidentRepository;
 import com.Incident.Management.incident_manager.repository.IncidentStatusRepository;
@@ -28,17 +29,20 @@ public class IncidentService {
     private final IncidentPriorityRepository priorityRepo;
     private final IncidentStatusRepository statusRepo;
     private final ApplicationRepository applicationRepo;
+    private final IncidentManagerRepository managerRepo;
 
     public IncidentService(
             IncidentRepository incidentRepo,
             IncidentPriorityRepository priorityRepo,
             IncidentStatusRepository statusRepo,
-            ApplicationRepository applicationRepo) {
+            ApplicationRepository applicationRepo,
+        IncidentManagerRepository managerRepo) {
 
         this.incidentRepo = incidentRepo;
         this.priorityRepo = priorityRepo;
         this.statusRepo = statusRepo;
         this.applicationRepo = applicationRepo;
+        this.managerRepo = managerRepo;
     }
     // -------------------------------
     // GET ALL (with pagination)
@@ -86,7 +90,12 @@ public class IncidentService {
         incident.setIncidentPriority(priority);
         incident.setStatus(status);
         incident.setRootCauseApp(rootCauseApp);
-
+        if (dto.getManagerId() != null) {
+        incident.setIncidentManager(
+            managerRepo.findById(dto.getManagerId())
+                .orElseThrow(() -> new RuntimeException("Invalid manager ID"))
+        );
+    }
         incident.setOutageStart(dto.getOutageStart());
         incident.setCrisisStart(dto.getCrisisStart());
         incident.setCrisisEnd(dto.getCrisisEnd());

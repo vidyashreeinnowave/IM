@@ -11,6 +11,7 @@ public class IncidentRequestDTO {
     private Integer priorityId;
     private Integer statusId;
     private String  rootCauseAppId;
+    private String managerId;
 
     private Timestamp outageStart;
     private Timestamp crisisStart;

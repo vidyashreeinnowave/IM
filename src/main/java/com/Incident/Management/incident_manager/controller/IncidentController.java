@@ -18,8 +18,14 @@ import com.Incident.Management.incident_manager.dto.IncidentRequestDTO;
 import com.Incident.Management.incident_manager.dto.IncidentResponseDTO;
 import com.Incident.Management.incident_manager.dto.KpiDashboardDTO;
 import com.Incident.Management.incident_manager.dto.ManagerStatsDTO;
+import com.Incident.Management.incident_manager.model.Application;
+import com.Incident.Management.incident_manager.model.IncidentPriority;
+import com.Incident.Management.incident_manager.model.IncidentStatus;
+import com.Incident.Management.incident_manager.service.ApplicationService;
 import com.Incident.Management.incident_manager.service.IncidentManagerService;
+import com.Incident.Management.incident_manager.service.IncidentPriorityService;
 import com.Incident.Management.incident_manager.service.IncidentService;
+import com.Incident.Management.incident_manager.service.IncidentStatusService;
 import com.Incident.Management.incident_manager.service.KpiDashboardService;
 import com.Incident.Management.incident_manager.service.ManagerStatsService;
 
@@ -31,12 +37,20 @@ public class IncidentController {
     private final ManagerStatsService statsService;
     private final KpiDashboardService kpiService;
     private final IncidentManagerService incidentManagerService;
+    private final IncidentPriorityService priorityService;
+    private final IncidentStatusService statusService;
+    private final ApplicationService applicationService;
 
-    public IncidentController(IncidentService incidentService, ManagerStatsService statsService, KpiDashboardService kpiService, IncidentManagerService incidentManagerService) {
+    public IncidentController(IncidentService incidentService, ManagerStatsService statsService, KpiDashboardService kpiService, IncidentManagerService incidentManagerService,IncidentPriorityService priorityService,
+            IncidentStatusService statusService,
+            ApplicationService applicationService) {
     this.incidentService = incidentService;
     this.statsService = statsService;
     this.kpiService = kpiService;
     this.incidentManagerService = incidentManagerService;
+    this.priorityService = priorityService;
+        this.statusService = statusService;
+        this.applicationService = applicationService;
 }
 
     // GET ALL incidents (OPTIONAL pagination)
@@ -78,7 +92,7 @@ public class IncidentController {
     }
 
     //Stats for IM Efficinecy Leaderboard
-    @GetMapping("/stats")
+    @GetMapping("/metrics/overall")
 public ResponseEntity<List<ManagerStatsDTO>> getStats() {
     return ResponseEntity.ok(statsService.getManagerStats(null, null, null));
 }
@@ -147,7 +161,20 @@ public ResponseEntity<List<ManagerStatsDTO>> getFilteredStats(
 public ResponseEntity<List<IncidentManagerResponseDTO>> getAllIncidentManagers() {
     return ResponseEntity.ok(incidentManagerService.getAllIncidentManagers());
 }
+@GetMapping("/priorities")
+    public List<IncidentPriority> getPriorities() {
+        return priorityService.getAll();
+    }
 
+    @GetMapping("/status")
+    public List<IncidentStatus> getStatuses() {
+        return statusService.getAll();
+    }
+
+    @GetMapping("/applications")
+    public List<Application> getApplications() {
+        return applicationService.getAll();
+    }
 }
 
 
