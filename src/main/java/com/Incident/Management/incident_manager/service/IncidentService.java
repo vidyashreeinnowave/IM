@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.Incident.Management.incident_manager.dto.ImpactedApplicationResponseDTO;
 import com.Incident.Management.incident_manager.dto.IncidentRequestDTO;
 import com.Incident.Management.incident_manager.dto.IncidentResponseDTO;
+import com.Incident.Management.incident_manager.dto.PrioritySummaryDTO;
 import com.Incident.Management.incident_manager.model.Application;
 import com.Incident.Management.incident_manager.model.Incident;
 import com.Incident.Management.incident_manager.model.IncidentPriority;
@@ -329,6 +330,9 @@ private Double calculateMTTR(Incident incident) {
     return incidents.stream()
             .map(this::mapToDTO)
             .toList();
+}
+public List<PrioritySummaryDTO> getPrioritySummary() {
+    return incidentRepo.getPrioritySummary();
 }
 
 }

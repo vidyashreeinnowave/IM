@@ -18,6 +18,7 @@ import com.Incident.Management.incident_manager.dto.IncidentRequestDTO;
 import com.Incident.Management.incident_manager.dto.IncidentResponseDTO;
 import com.Incident.Management.incident_manager.dto.KpiDashboardDTO;
 import com.Incident.Management.incident_manager.dto.ManagerStatsDTO;
+import com.Incident.Management.incident_manager.dto.PrioritySummaryDTO;
 import com.Incident.Management.incident_manager.model.Application;
 import com.Incident.Management.incident_manager.model.IncidentPriority;
 import com.Incident.Management.incident_manager.model.IncidentStatus;
@@ -175,6 +176,11 @@ public ResponseEntity<List<IncidentManagerResponseDTO>> getAllIncidentManagers()
     public List<Application> getApplications() {
         return applicationService.getAll();
     }
+    @GetMapping("/priority-summary")
+public ResponseEntity<List<PrioritySummaryDTO>> getPrioritySummary() {
+    return ResponseEntity.ok(incidentService.getPrioritySummary());
+}
+
 }
 
 
