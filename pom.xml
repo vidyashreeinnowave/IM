@@ -27,6 +27,9 @@
        <url/>
     </scm>
     <properties>
+
+      <custom.version>v${maven.build.timestamp} build-${git.commit.id.abbrev}</custom.version>
+         <maven.build.timestamp.format>yyyy.MM.dd-HHmm</maven.build.timestamp.format>
        <java.version>17</java.version>
        <docker.image.prefix>proximuscr.azurecr.io</docker.image.prefix>
     </properties>
@@ -42,12 +45,12 @@
           <artifactId>spring-boot-starter-web</artifactId>
        </dependency>
 
-       <dependency>
+       <!-- <dependency>
           <groupId>org.springframework.boot</groupId>
           <artifactId>spring-boot-devtools</artifactId>
           <scope>runtime</scope>
           <optional>true</optional>
-       </dependency>
+       </dependency> -->
        <dependency>
           <groupId>org.postgresql</groupId>
           <artifactId>postgresql</artifactId>
@@ -73,52 +76,84 @@
     </dependencies>
 
     <build>
-       <finalName>proximus</finalName>
-       <plugins>
-          <plugin>
-             <groupId>org.apache.maven.plugins</groupId>
-             <artifactId>maven-compiler-plugin</artifactId>
-             <configuration>
+    <finalName>proximus</finalName>
+
+    <plugins>
+
+        <!-- Compiler plugin -->
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <configuration>
                 <annotationProcessorPaths>
-                   <path>
-                      <groupId>org.projectlombok</groupId>
-                      <artifactId>lombok</artifactId>
-                   </path>
+                    <path>
+                        <groupId>org.projectlombok</groupId>
+                        <artifactId>lombok</artifactId>
+                    </path>
                 </annotationProcessorPaths>
-             </configuration>
-          </plugin>
-          <plugin>
-             <groupId>org.springframework.boot</groupId>
-             <artifactId>spring-boot-maven-plugin</artifactId>
-             <configuration>
-                <excludes>
-                   <exclude>
-                      <groupId>org.projectlombok</groupId>
-                      <artifactId>lombok</artifactId>
-                   </exclude>
-                </excludes>
-             </configuration>
-          </plugin>
-          <plugin>
-    <groupId>com.spotify</groupId>
-       <artifactId>docker-maven-plugin</artifactId>
-       <version>1.2.2</version>
-       <configuration>
-          <imageName>${docker.image.prefix}/${project.artifactId}</imageName>
-          <baseImage>eclipse-temurin:17-jdk-jammy</baseImage>
-          <entryPoint>["java", "-jar", "/${project.build.finalName}.jar"]</entryPoint>
-          <resources>
-          <resource>
-          <targetPath>/</targetPath>
-          <directory>${project.build.directory}</directory>
-             <include>${project.build.finalName}.jar</include>
-          </resource>
-          </resources>
-          <serverId>innlink</serverId>
-          <registryUrl>https://innlink.azurecr.io</registryUrl>
-       </configuration>
-    </plugin>
-       </plugins>
-    </build>
+            </configuration>
+        </plugin>
+
+        <!-- Spring Boot plugin - generates META-INF/build-info.properties -->
+        <plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+            <configuration>
+        <additionalProperties>
+            <app.version>${custom.version}</app.version>
+        </additionalProperties>
+    </configuration>
+            <executions>
+                <execution>
+                    <id>build-info</id>
+                    <goals>
+                        <goal>build-info</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
+
+        <!-- Git commit info plugin - generates git.properties -->
+        <plugin>
+            <groupId>pl.project13.maven</groupId>
+            <artifactId>git-commit-id-plugin</artifactId>
+            <version>4.9.10</version>
+            <configuration>
+                <generateGitPropertiesFile>true</generateGitPropertiesFile>
+                <gitPropertiesFilePath>${project.build.outputDirectory}</gitPropertiesFilePath>
+            </configuration>
+            <executions>
+                <execution>
+                    <goals>
+                        <goal>revision</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
+
+        <!-- Docker plugin -->
+        <plugin>
+            <groupId>com.spotify</groupId>
+            <artifactId>docker-maven-plugin</artifactId>
+            <version>1.2.2</version>
+            <configuration>
+                <imageName>${docker.image.prefix}/${project.artifactId}</imageName>
+                <baseImage>eclipse-temurin:17-jdk-jammy</baseImage>
+                <entryPoint>["java", "-jar", "/${project.build.finalName}.jar"]</entryPoint>
+                <resources>
+                    <resource>
+                        <targetPath>/</targetPath>
+                        <directory>${project.build.directory}</directory>
+                        <include>${project.build.finalName}.jar</include>
+                    </resource>
+                </resources>
+                <serverId>innlink</serverId>
+                <registryUrl>https://innlink.azurecr.io</registryUrl>
+            </configuration>
+        </plugin>
+
+    </plugins>
+</build>
+
 
 </project>

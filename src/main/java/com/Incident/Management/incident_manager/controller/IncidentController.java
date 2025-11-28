@@ -22,6 +22,7 @@ import com.Incident.Management.incident_manager.dto.PrioritySummaryDTO;
 import com.Incident.Management.incident_manager.model.Application;
 import com.Incident.Management.incident_manager.model.IncidentPriority;
 import com.Incident.Management.incident_manager.model.IncidentStatus;
+import com.Incident.Management.incident_manager.model.Team;
 import com.Incident.Management.incident_manager.service.ApplicationService;
 import com.Incident.Management.incident_manager.service.IncidentManagerService;
 import com.Incident.Management.incident_manager.service.IncidentPriorityService;
@@ -29,6 +30,7 @@ import com.Incident.Management.incident_manager.service.IncidentService;
 import com.Incident.Management.incident_manager.service.IncidentStatusService;
 import com.Incident.Management.incident_manager.service.KpiDashboardService;
 import com.Incident.Management.incident_manager.service.ManagerStatsService;
+import com.Incident.Management.incident_manager.service.TeamService;
 
 @RestController
 @RequestMapping("/api/incidents")
@@ -41,10 +43,12 @@ public class IncidentController {
     private final IncidentPriorityService priorityService;
     private final IncidentStatusService statusService;
     private final ApplicationService applicationService;
+    private final TeamService teamService;
+
 
     public IncidentController(IncidentService incidentService, ManagerStatsService statsService, KpiDashboardService kpiService, IncidentManagerService incidentManagerService,IncidentPriorityService priorityService,
             IncidentStatusService statusService,
-            ApplicationService applicationService) {
+            ApplicationService applicationService, TeamService teamService) {
     this.incidentService = incidentService;
     this.statsService = statsService;
     this.kpiService = kpiService;
@@ -52,6 +56,7 @@ public class IncidentController {
     this.priorityService = priorityService;
         this.statusService = statusService;
         this.applicationService = applicationService;
+        this.teamService = teamService;
 }
 
     // GET ALL incidents (OPTIONAL pagination)
@@ -198,6 +203,10 @@ public ResponseEntity<List<IncidentManagerResponseDTO>> getAllIncidentManagers()
     // public ResponseEntity<List<IncidentResponseDTO>> globalSearch(@RequestParam String keyword) {
     //     return ResponseEntity.ok(incidentService.globalSearch(keyword));
     // }
+    @GetMapping("/teams")
+    public ResponseEntity<List<Team>> getAllTeams() {
+        return ResponseEntity.ok(teamService.getAllTeams());
+    }
 }
 
 
