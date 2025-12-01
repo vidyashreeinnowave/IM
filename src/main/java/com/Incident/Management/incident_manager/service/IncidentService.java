@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.Incident.Management.incident_manager.dto.ImpactedApplicationResponseDTO;
 import com.Incident.Management.incident_manager.dto.IncidentRequestDTO;
 import com.Incident.Management.incident_manager.dto.IncidentResponseDTO;
+import com.Incident.Management.incident_manager.dto.ManagerPriorityResponse;
 import com.Incident.Management.incident_manager.dto.PrioritySummaryDTO;
 import com.Incident.Management.incident_manager.model.Application;
 import com.Incident.Management.incident_manager.model.Incident;
@@ -372,4 +374,37 @@ public List<IncidentResponseDTO> searchIncidents(
                 .map(IncidentResponseDTO::fromEntity)
                 .toList();
     }
+    public List<ManagerPriorityResponse> getPrioritySummaryTransformed() {
+
+    List<PrioritySummaryDTO> rawList = incidentRepo.getPrioritySummary();
+
+    // Group by managerId
+    Map<String, List<PrioritySummaryDTO>> grouped =
+            rawList.stream().collect(Collectors.groupingBy(PrioritySummaryDTO::getManagerId));
+
+    // Convert into required output
+    List<ManagerPriorityResponse> result = new ArrayList<>();
+
+    for (Map.Entry<String, List<PrioritySummaryDTO>> entry : grouped.entrySet()) {
+
+
+        ManagerPriorityResponse response = new ManagerPriorityResponse();
+        response.setManagerId(entry.getKey());
+
+        List<ManagerPriorityResponse.PriorityItem> priorities =
+                entry.getValue().stream()
+                        .map(p -> new ManagerPriorityResponse.PriorityItem(
+                                p.getPriorityCode(),
+                                p.getIncidentCount()
+                        ))
+                        .collect(Collectors.toList());
+
+        response.setPriority(priorities);
+
+        result.add(response);
+    }
+
+    return result;
+}
+
 }
