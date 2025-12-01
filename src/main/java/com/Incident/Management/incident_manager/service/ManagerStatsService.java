@@ -58,8 +58,8 @@ public class ManagerStatsService {
             double avgMTTR = incidents.stream()
                     .filter(i -> i.getCrisisEnd() != null && i.getOutageStart() != null)
                     .mapToLong(i -> Duration.between(
-                            i.getOutageStart().toLocalDateTime(),
-                            i.getCrisisEnd().toLocalDateTime()
+                            i.getOutageStart(),
+                            i.getCrisisEnd()
                     ).toMinutes())
                     .average()
                     .orElse(0);
@@ -67,8 +67,8 @@ public class ManagerStatsService {
             double avgMTTE = incidents.stream()
                     .filter(i -> i.getCrisisStart() != null && i.getOutageStart() != null)
                     .mapToLong(i -> Duration.between(
-                            i.getOutageStart().toLocalDateTime(),
-                            i.getCrisisStart().toLocalDateTime()
+                            i.getOutageStart(),
+                            i.getCrisisStart()
                     ).toMinutes())
                     .average()
                     .orElse(0);

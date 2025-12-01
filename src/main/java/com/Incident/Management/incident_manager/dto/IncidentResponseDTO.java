@@ -1,6 +1,5 @@
 package com.Incident.Management.incident_manager.dto;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,21 +17,19 @@ public class IncidentResponseDTO {
     private String incidentNumber;
 
     private IncidentPriority incidentPriority;
-    private String incidentManager; // managerId
     private IncidentStatus status;
-
     private Application rootCauseApp;
     private List<ImpactedApplicationResponseDTO> impactedApplications;
 
-    private Timestamp outageStart;
-    private Timestamp crisisStart;
-    private Timestamp crisisEnd;
+    private LocalDateTime outageStart;
+    private LocalDateTime crisisStart;
+    private LocalDateTime crisisEnd;
 
     private String warRoomLink;
     private String rootCauseReason;
     private String debriefLink;
     private String debriefSummary;
-    private Timestamp debriefTime;
+    private LocalDateTime debriefTime;
 
     private String problemTicketNumber;
     private String debriefAttachmentPath;
@@ -48,18 +45,15 @@ public class IncidentResponseDTO {
 
     private String teamId;
     private String teamName;
+
     // -------------------------
-    // STATIC MAPPER (IMPORTANT)
+    // STATIC MAPPER
     // -------------------------
     public static IncidentResponseDTO fromEntity(Incident incident) {
         IncidentResponseDTO dto = new IncidentResponseDTO();
 
         dto.setIncidentNumber(incident.getIncidentNumber());
         dto.setIncidentPriority(incident.getIncidentPriority());
-        dto.setIncidentManager(
-                incident.getIncidentManager() != null ?
-                        incident.getIncidentManager().getManagerId() : null
-        );
         dto.setStatus(incident.getStatus());
         dto.setRootCauseApp(incident.getRootCauseApp());
 
@@ -73,14 +67,16 @@ public class IncidentResponseDTO {
             );
         }
 
+        // Direct assignment since entity uses LocalDateTime
         dto.setOutageStart(incident.getOutageStart());
         dto.setCrisisStart(incident.getCrisisStart());
         dto.setCrisisEnd(incident.getCrisisEnd());
+        dto.setDebriefTime(incident.getDebriefTime());
+
         dto.setWarRoomLink(incident.getWarRoomLink());
         dto.setRootCauseReason(incident.getRootCauseReason());
         dto.setDebriefLink(incident.getDebriefLink());
         dto.setDebriefSummary(incident.getDebriefSummary());
-        dto.setDebriefTime(incident.getDebriefTime());
         dto.setProblemTicketNumber(incident.getProblemTicketNumber());
         dto.setDebriefAttachmentPath(incident.getDebriefAttachmentPath());
 
@@ -90,21 +86,24 @@ public class IncidentResponseDTO {
         if (incident.getIncidentManager() != null) {
             dto.setManagerName(incident.getIncidentManager().getManagerName());
             dto.setManagerId(incident.getIncidentManager().getManagerId());
-            dto.setTeamId(incident.getIncidentManager().getTeam().getTeamId());
-            dto.setTeamName(incident.getIncidentManager().getTeam().getTeamName());
         }
 
-        // Compute MTTx if needed
-        if (incident.getOutageStart() != null && incident.getCrisisStart() != null) {
-            Double mttEngage = (double) (incident.getCrisisStart().toInstant().toEpochMilli()
-                    - incident.getOutageStart().toInstant().toEpochMilli());
-            dto.setMeanTimeToEngage(mttEngage / 60000); // minutes
+        if (incident.getTeam() != null) {
+            dto.setTeamId(incident.getTeam().getTeamId());
+            dto.setTeamName(incident.getTeam().getTeamName());
         }
 
-        if (incident.getOutageStart() != null && incident.getCrisisEnd() != null) {
-            Double mttResolve = (double) (incident.getCrisisEnd().toInstant().toEpochMilli()
-                    - incident.getOutageStart().toInstant().toEpochMilli());
-            dto.setMeanTimeToResolve(mttResolve / 60000); // minutes
+        // Compute MTTx in minutes
+        if (dto.getOutageStart() != null && dto.getCrisisStart() != null) {
+            dto.setMeanTimeToEngage(
+                    (double) java.time.Duration.between(dto.getOutageStart(), dto.getCrisisStart()).toMinutes()
+            );
+        }
+
+        if (dto.getOutageStart() != null && dto.getCrisisEnd() != null) {
+            dto.setMeanTimeToResolve(
+                    (double) java.time.Duration.between(dto.getOutageStart(), dto.getCrisisEnd()).toMinutes()
+            );
         }
 
         return dto;

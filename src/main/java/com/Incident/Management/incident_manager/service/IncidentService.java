@@ -5,8 +5,10 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,7 @@ import com.Incident.Management.incident_manager.dto.ManagerPriorityResponse;
 import com.Incident.Management.incident_manager.dto.PrioritySummaryDTO;
 import com.Incident.Management.incident_manager.model.Application;
 import com.Incident.Management.incident_manager.model.Incident;
+import com.Incident.Management.incident_manager.model.IncidentManager;
 import com.Incident.Management.incident_manager.model.IncidentPriority;
 import com.Incident.Management.incident_manager.model.IncidentStatus;
 import com.Incident.Management.incident_manager.repository.ApplicationRepository;
@@ -25,6 +28,7 @@ import com.Incident.Management.incident_manager.repository.IncidentManagerReposi
 import com.Incident.Management.incident_manager.repository.IncidentPriorityRepository;
 import com.Incident.Management.incident_manager.repository.IncidentRepository;
 import com.Incident.Management.incident_manager.repository.IncidentStatusRepository;
+import com.Incident.Management.incident_manager.repository.TeamRepository;
 
 @Service
 public class IncidentService {
@@ -34,19 +38,23 @@ public class IncidentService {
     private final IncidentStatusRepository statusRepo;
     private final ApplicationRepository applicationRepo;
     private final IncidentManagerRepository managerRepo;
+    @Autowired
+    private TeamRepository teamRepo;
+
 
     public IncidentService(
             IncidentRepository incidentRepo,
             IncidentPriorityRepository priorityRepo,
             IncidentStatusRepository statusRepo,
             ApplicationRepository applicationRepo,
-        IncidentManagerRepository managerRepo) {
+        IncidentManagerRepository managerRepo, TeamRepository teamRepo) {
 
         this.incidentRepo = incidentRepo;
         this.priorityRepo = priorityRepo;
         this.statusRepo = statusRepo;
         this.applicationRepo = applicationRepo;
         this.managerRepo = managerRepo;
+        this.teamRepo = teamRepo;
     }
     // -------------------------------
     // GET ALL (with pagination)
@@ -77,43 +85,78 @@ public class IncidentService {
     // -------------------------------
     public IncidentResponseDTO createIncident(IncidentRequestDTO dto) {
 
-        IncidentPriority priority = priorityRepo.findById(dto.getPriorityId())
-                .orElseThrow(() -> new RuntimeException("Invalid priority ID"));
+    // Helper to normalize empty strings to null
+    Function<String, String> normalize = s -> (s == null || s.isBlank()) ? null : s;
 
-        IncidentStatus status = statusRepo.findById(dto.getStatusId())
-                .orElseThrow(() -> new RuntimeException("Invalid status ID"));
+    // Normalize optional string fields
+    dto.setRootCauseAppId(normalize.apply(dto.getRootCauseAppId()));
+    dto.setManagerId(normalize.apply(dto.getManagerId()));
+    dto.setTeamId(normalize.apply(dto.getTeamId()));
+    dto.setWarRoomLink(normalize.apply(dto.getWarRoomLink()));
+    dto.setRootCauseReason(normalize.apply(dto.getRootCauseReason()));
+    dto.setDebriefLink(normalize.apply(dto.getDebriefLink()));
+    dto.setDebriefSummary(normalize.apply(dto.getDebriefSummary()));
+    // dto.setDebriefTime(normalize.apply(dto.getDebriefTime()));
+    dto.setProblemTicketNumber(normalize.apply(dto.getProblemTicketNumber()));
 
-        Application rootCauseApp = null;
-        if (dto.getRootCauseAppId() != null) {
-            rootCauseApp = applicationRepo.findById(dto.getRootCauseAppId())
-                    .orElseThrow(() -> new RuntimeException("Invalid app ID"));
-        }
+    // Validate required references
+    IncidentPriority priority = priorityRepo.findById(dto.getPriorityId())
+            .orElseThrow(() -> new RuntimeException("Invalid priority ID"));
 
-        Incident incident = new Incident();
-        incident.setIncidentNumber(dto.getIncidentNumber());
-        incident.setIncidentPriority(priority);
-        incident.setStatus(status);
-        incident.setRootCauseApp(rootCauseApp);
-        if (dto.getManagerId() != null) {
-        incident.setIncidentManager(
-            managerRepo.findById(dto.getManagerId())
-                .orElseThrow(() -> new RuntimeException("Invalid manager ID"))
-        );
+    IncidentStatus status = statusRepo.findById(dto.getStatusId())
+            .orElseThrow(() -> new RuntimeException("Invalid status ID"));
+
+    Application rootCauseApp = null;
+    if (dto.getRootCauseAppId() != null) {
+        rootCauseApp = applicationRepo.findById(dto.getRootCauseAppId())
+                .orElseThrow(() -> new RuntimeException("Invalid app ID"));
     }
-        incident.setOutageStart(dto.getOutageStart());
-        incident.setCrisisStart(dto.getCrisisStart());
-        incident.setCrisisEnd(dto.getCrisisEnd());
-        incident.setWarRoomLink(dto.getWarRoomLink());
-        incident.setRootCauseReason(dto.getRootCauseReason());
-        incident.setDebriefLink(dto.getDebriefLink());
-        incident.setDebriefSummary(dto.getDebriefSummary());
-        incident.setDebriefTime(dto.getDebriefTime());
-        incident.setProblemTicketNumber(dto.getProblemTicketNumber());
 
-        incidentRepo.save(incident);
+    Incident incident = new Incident();
+    incident.setIncidentNumber(generateIncidentNumber());
+    incident.setIncidentPriority(priority);
+    incident.setStatus(status);
+    incident.setRootCauseApp(rootCauseApp);
 
-        return mapToDTO(incident);
+    if (dto.getTeamId() != null) {
+        incident.setTeam(teamRepo.findById(dto.getTeamId())
+                .orElseThrow(() -> new RuntimeException("Invalid team ID")));
     }
+
+    if (dto.getManagerId() != null) {
+        IncidentManager manager = managerRepo.findById(dto.getManagerId())
+                .orElseThrow(() -> new RuntimeException("Invalid manager ID"));
+        incident.setIncidentManager(manager);
+    }
+
+    // Validate date logic
+    if (dto.getOutageStart() != null && dto.getCrisisStart() != null &&
+        dto.getCrisisStart().isBefore(dto.getOutageStart())) {
+        throw new IllegalArgumentException("crisisStart must be after outageStart");
+    }
+
+    incident.setOutageStart(dto.getOutageStart());
+    incident.setCrisisStart(dto.getCrisisStart());
+    incident.setCrisisEnd(dto.getCrisisEnd());
+    incident.setWarRoomLink(dto.getWarRoomLink());
+    incident.setRootCauseReason(dto.getRootCauseReason());
+    incident.setDebriefLink(dto.getDebriefLink());
+    incident.setDebriefSummary(dto.getDebriefSummary());
+    incident.setDebriefTime(dto.getDebriefTime());
+    incident.setProblemTicketNumber(dto.getProblemTicketNumber());
+
+    Incident savedIncident = incidentRepo.save(incident);
+    return mapToDTO(savedIncident);
+}
+
+
+// ------------------
+// Auto-generator method
+// ------------------
+private String generateIncidentNumber() {
+    return "INC-" + System.currentTimeMillis();
+}
+
 
     // -------------------------------
     // UPDATE INCIDENT
@@ -170,7 +213,8 @@ public class IncidentService {
         return null;
     }
 
-    long minutes = (incident.getCrisisStart().getTime() - incident.getOutageStart().getTime()) / (1000 * 60);
+    // Use Duration.between for LocalDateTime
+    long minutes = java.time.Duration.between(incident.getOutageStart(), incident.getCrisisStart()).toMinutes();
     return (double) minutes;
 }
 
@@ -179,7 +223,8 @@ private Double calculateMTTR(Incident incident) {
         return null;
     }
 
-    long minutes = (incident.getCrisisEnd().getTime() - incident.getCrisisStart().getTime()) / (1000 * 60);
+    // Use Duration.between for LocalDateTime
+    long minutes = java.time.Duration.between(incident.getCrisisStart(), incident.getCrisisEnd()).toMinutes();
     return (double) minutes;
 }
 
@@ -207,6 +252,11 @@ private Double calculateMTTR(Incident incident) {
         dto.setManagerId(incident.getIncidentManager().getManagerId());
         dto.setManagerName(incident.getIncidentManager().getManagerName());
     }
+// Team details
+if (incident.getTeam() != null) {
+    dto.setTeamId(incident.getTeam().getTeamId());
+    dto.setTeamName(incident.getTeam().getTeamName());
+}
 
     // FULL PRIORITY OBJECT
     dto.setIncidentPriority(incident.getIncidentPriority());

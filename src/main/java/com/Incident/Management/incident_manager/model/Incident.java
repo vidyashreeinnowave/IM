@@ -5,6 +5,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
@@ -51,18 +54,26 @@ public class Incident {
     @OneToMany(mappedBy = "incident", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<ImpactedApplication> impactedApplications = new ArrayList<>();
+    @ManyToOne
+    @JoinColumn(name = "team_id")
+    private Team team;
+    private LocalDateTime outageStart;
+private LocalDateTime crisisStart;
+private LocalDateTime crisisEnd;
+private LocalDateTime debriefTime;
 
-    private Timestamp outageStart;
-    private Timestamp crisisStart;
-    private Timestamp crisisEnd;
     private String warRoomLink;
     private String rootCauseReason;
     private String debriefLink;
     private String debriefSummary;
-    private Timestamp debriefTime;
     private String problemTicketNumber;
     private String debriefAttachmentPath;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    @CreationTimestamp
+@Column(updatable = false)
+private LocalDateTime createdAt;
+
+@UpdateTimestamp
+private LocalDateTime updatedAt;
+
 
 }

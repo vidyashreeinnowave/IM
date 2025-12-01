@@ -25,8 +25,8 @@ public class KpiDashboardService {
         double avgMTTR = incidents.stream()
                 .filter(i -> i.getOutageStart() != null && i.getCrisisEnd() != null)
                 .mapToLong(i -> Duration.between(
-                        i.getOutageStart().toLocalDateTime(),
-                        i.getCrisisEnd().toLocalDateTime()
+                        i.getOutageStart(),
+                        i.getCrisisEnd()
                 ).toMinutes())
                 .average()
                 .orElse(0);
@@ -40,8 +40,8 @@ public class KpiDashboardService {
         double avgMTTE = incidents.stream()
                 .filter(i -> i.getOutageStart() != null && i.getCrisisStart() != null)
                 .mapToLong(i -> Duration.between(
-                        i.getOutageStart().toLocalDateTime(),
-                        i.getCrisisStart().toLocalDateTime()
+                        i.getOutageStart(),
+                        i.getCrisisStart()
                 ).toMinutes())
                 .average()
                 .orElse(0);
