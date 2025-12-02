@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import com.Incident.Management.incident_manager.dto.ImpactedApplicationResponseDTO;
 import com.Incident.Management.incident_manager.dto.IncidentRequestDTO;
 import com.Incident.Management.incident_manager.dto.IncidentResponseDTO;
+import com.Incident.Management.incident_manager.dto.IncidentUpdateRequest;
 import com.Incident.Management.incident_manager.dto.ManagerPriorityResponse;
 import com.Incident.Management.incident_manager.dto.PrioritySummaryDTO;
 import com.Incident.Management.incident_manager.model.Application;
@@ -140,7 +141,7 @@ public class IncidentService {
     incident.setCrisisEnd(dto.getCrisisEnd());
     incident.setWarRoomLink(dto.getWarRoomLink());
     incident.setRootCauseReason(dto.getRootCauseReason());
-    incident.setDebriefLink(dto.getDebriefLink());
+    incident.setDebriefMeetingLink(dto.getDebriefLink());
     incident.setDebriefSummary(dto.getDebriefSummary());
     incident.setDebriefTime(dto.getDebriefTime());
     incident.setProblemTicketNumber(dto.getProblemTicketNumber());
@@ -157,6 +158,69 @@ private String generateIncidentNumber() {
     return "INC-" + System.currentTimeMillis();
 }
 
+public Incident updateIncident(String id, IncidentUpdateRequest req) {
+
+        Incident incident = incidentRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Incident not found"));
+
+        String status = req.getStatus();
+
+        switch (status) {
+
+            case "Active":
+            case "Ongoing":
+            case "Resolved":
+                // No fields allowed at this stage
+                rejectIfPresent("Debrief Meeting Link", req.getDebriefMeetingLink());
+                rejectIfPresent("Debrief Summary", req.getDebriefSummary());
+                rejectIfPresent("Debrief Time", req.getDebriefTime());
+                rejectIfPresent("Problem Ticket Number", req.getProblemTicketNumber());
+                break;
+
+            case "Debrief Scheduled":
+                // Only meeting link allowed
+                rejectIfPresent("Debrief Summary", req.getDebriefSummary());
+                rejectIfPresent("Debrief Time", req.getDebriefTime());
+                rejectIfPresent("Problem Ticket Number", req.getProblemTicketNumber());
+                break;
+
+            case "Debrief Done":
+                // Meeting link NOT allowed in Debrief Done
+                rejectIfPresent("Debrief Meeting Link", req.getDebriefMeetingLink());
+                // All final debrief fields required
+                requireField("Debrief Summary", req.getDebriefSummary());
+                requireField("Debrief Time", req.getDebriefTime());
+                requireField("Problem Ticket Number", req.getProblemTicketNumber());
+                break;
+
+            default:
+                throw new IllegalArgumentException("Invalid status: " + status);
+        }
+
+        // Update incident after validation
+        IncidentStatus statusEntity = statusRepo.findByStatusName(status)
+        .orElseThrow(() -> new RuntimeException("Invalid status: " + status));
+
+        incident.setStatus(statusEntity);
+        incident.setDebriefMeetingLink(req.getDebriefMeetingLink());
+        incident.setDebriefSummary(req.getDebriefSummary());
+        incident.setDebriefTime(req.getDebriefTime());
+        incident.setProblemTicketNumber(req.getProblemTicketNumber());
+
+        return incidentRepo.save(incident);
+    }
+
+    private void rejectIfPresent(String field, Object value) {
+        if (value != null && !value.toString().trim().isEmpty()) {
+            throw new IllegalArgumentException(field + " is not allowed for this status.");
+        }
+    }
+
+    private void requireField(String field, Object value) {
+        if (value == null || value.toString().trim().isEmpty()) {
+            throw new IllegalArgumentException(field + " is required when status is 'Debrief Done'.");
+        }
+    }
 
     // -------------------------------
     // UPDATE INCIDENT
@@ -191,7 +255,7 @@ private String generateIncidentNumber() {
         incident.setCrisisEnd(dto.getCrisisEnd());
         incident.setWarRoomLink(dto.getWarRoomLink());
         incident.setRootCauseReason(dto.getRootCauseReason());
-        incident.setDebriefLink(dto.getDebriefLink());
+        incident.setDebriefMeetingLink(dto.getDebriefLink());
         incident.setDebriefSummary(dto.getDebriefSummary());
         incident.setDebriefTime(dto.getDebriefTime());
         incident.setProblemTicketNumber(dto.getProblemTicketNumber());
@@ -239,7 +303,7 @@ private Double calculateMTTR(Incident incident) {
     dto.setCrisisEnd(incident.getCrisisEnd());
     dto.setWarRoomLink(incident.getWarRoomLink());
     dto.setRootCauseReason(incident.getRootCauseReason());
-    dto.setDebriefLink(incident.getDebriefLink());
+    dto.setDebriefLink(incident.getDebriefMeetingLink());
     dto.setDebriefSummary(incident.getDebriefSummary());
     dto.setDebriefTime(incident.getDebriefTime());
     dto.setProblemTicketNumber(incident.getProblemTicketNumber());

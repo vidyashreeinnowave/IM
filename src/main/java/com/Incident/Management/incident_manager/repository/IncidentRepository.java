@@ -1,6 +1,7 @@
 package com.Incident.Management.incident_manager.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -58,6 +59,9 @@ public interface IncidentRepository extends JpaRepository<Incident, String> {
     GROUP BY p.priorityId, p.priorityCode, m.managerId, m.managerName
 """)
 List<PrioritySummaryDTO> getPrioritySummary();
+
+   Optional<Incident> findById(String incidentNumber);
+
 
 }
 

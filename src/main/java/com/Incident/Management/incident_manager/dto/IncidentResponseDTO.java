@@ -75,7 +75,7 @@ public class IncidentResponseDTO {
 
         dto.setWarRoomLink(incident.getWarRoomLink());
         dto.setRootCauseReason(incident.getRootCauseReason());
-        dto.setDebriefLink(incident.getDebriefLink());
+        dto.setDebriefLink(incident.getDebriefMeetingLink());
         dto.setDebriefSummary(incident.getDebriefSummary());
         dto.setProblemTicketNumber(incident.getProblemTicketNumber());
         dto.setDebriefAttachmentPath(incident.getDebriefAttachmentPath());

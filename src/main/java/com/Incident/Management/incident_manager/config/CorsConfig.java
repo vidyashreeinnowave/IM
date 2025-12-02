@@ -12,8 +12,11 @@ public class CorsConfig {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/api/**")  // all /api endpoints
-                        .allowedOrigins("http://localhost:4200")  // your frontend
+                registry.addMapping("/api/**")
+                        .allowedOrigins(
+                                "http://localhost:4200",
+                                "https://incident-tracker-one.vercel.app" // add Vercel app
+                        )
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true);
@@ -21,4 +24,5 @@ public class CorsConfig {
         };
     }
 }
+
 

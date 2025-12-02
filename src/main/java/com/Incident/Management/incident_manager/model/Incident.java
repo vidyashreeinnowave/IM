@@ -1,6 +1,5 @@
 package com.Incident.Management.incident_manager.model;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -64,7 +63,7 @@ private LocalDateTime debriefTime;
 
     private String warRoomLink;
     private String rootCauseReason;
-    private String debriefLink;
+    private String debriefMeetingLink;
     private String debriefSummary;
     private String problemTicketNumber;
     private String debriefAttachmentPath;
@@ -74,6 +73,5 @@ private LocalDateTime createdAt;
 
 @UpdateTimestamp
 private LocalDateTime updatedAt;
-
 
 }

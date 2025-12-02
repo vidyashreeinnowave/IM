@@ -16,10 +16,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.Incident.Management.incident_manager.dto.IncidentManagerResponseDTO;
 import com.Incident.Management.incident_manager.dto.IncidentRequestDTO;
 import com.Incident.Management.incident_manager.dto.IncidentResponseDTO;
+import com.Incident.Management.incident_manager.dto.IncidentUpdateRequest;
 import com.Incident.Management.incident_manager.dto.KpiDashboardDTO;
 import com.Incident.Management.incident_manager.dto.ManagerPriorityResponse;
 import com.Incident.Management.incident_manager.dto.ManagerStatsDTO;
 import com.Incident.Management.incident_manager.model.Application;
+import com.Incident.Management.incident_manager.model.Incident;
 import com.Incident.Management.incident_manager.model.IncidentPriority;
 import com.Incident.Management.incident_manager.model.IncidentStatus;
 import com.Incident.Management.incident_manager.model.Team;
@@ -84,13 +86,19 @@ public class IncidentController {
     }
 
     // UPDATE INCIDENT
+    // @PutMapping("/{incidentNumber}")
+    // public IncidentResponseDTO update(
+    //         @PathVariable String incidentNumber,
+    //         @RequestBody IncidentRequestDTO dto) {
+    //     return incidentService.updateIncident(incidentNumber, dto);
+    // }
     @PutMapping("/{incidentNumber}")
-    public IncidentResponseDTO update(
+    public ResponseEntity<Incident> updateIncident(
             @PathVariable String incidentNumber,
-            @RequestBody IncidentRequestDTO dto) {
-        return incidentService.updateIncident(incidentNumber, dto);
+            @RequestBody IncidentUpdateRequest req) {
+        Incident updated = incidentService.updateIncident(incidentNumber, req);
+        return ResponseEntity.ok(updated);
     }
-
     // DELETE INCIDENT
     @DeleteMapping("/{incidentNumber}")
     public void delete(@PathVariable String incidentNumber) {
