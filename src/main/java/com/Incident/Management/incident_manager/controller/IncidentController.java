@@ -22,6 +22,7 @@ import com.Incident.Management.incident_manager.dto.ManagerPriorityResponse;
 import com.Incident.Management.incident_manager.dto.ManagerStatsDTO;
 import com.Incident.Management.incident_manager.model.Application;
 import com.Incident.Management.incident_manager.model.Incident;
+import com.Incident.Management.incident_manager.model.IncidentManager;
 import com.Incident.Management.incident_manager.model.IncidentPriority;
 import com.Incident.Management.incident_manager.model.IncidentStatus;
 import com.Incident.Management.incident_manager.model.Team;
@@ -219,6 +220,10 @@ public ResponseEntity<List<ManagerPriorityResponse>> getPrioritySummary() {
     @GetMapping("/teams")
     public ResponseEntity<List<Team>> getAllTeams() {
         return ResponseEntity.ok(teamService.getAllTeams());
+    }
+    @GetMapping("/incident-manager/{id}")
+    public IncidentManager getManagerById(@PathVariable String id) {
+        return incidentManagerService.getManagerById(id);
     }
 }
 

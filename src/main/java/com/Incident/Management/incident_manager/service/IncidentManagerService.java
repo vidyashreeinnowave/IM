@@ -67,4 +67,8 @@ public class IncidentManagerService {
 
         return dto;
     }
+     public IncidentManager getManagerById(String managerId) {
+        return managerRepo.findById(managerId)
+                .orElseThrow(() -> new RuntimeException("Manager not found with ID: " + managerId));
+    }
 }

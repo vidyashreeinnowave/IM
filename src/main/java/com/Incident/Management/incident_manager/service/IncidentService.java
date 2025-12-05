@@ -520,5 +520,4 @@ public List<IncidentResponseDTO> searchIncidents(
 
     return result;
 }
-
 }

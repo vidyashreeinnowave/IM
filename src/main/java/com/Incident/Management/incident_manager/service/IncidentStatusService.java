@@ -15,6 +15,6 @@ public class IncidentStatusService {
     }
 
     public List<IncidentStatus> getAll() {
-        return repo.findAll();
+        return repo.findAllByOrderByStatusIdAsc();
     }
 }
