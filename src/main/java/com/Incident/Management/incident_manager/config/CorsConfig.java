@@ -15,7 +15,9 @@ public class CorsConfig {
                 registry.addMapping("/api/**")
                         .allowedOrigins(
                                 "http://localhost:4200",
-                                "https://incident-tracker-one.vercel.app" // add Vercel app
+                                "https://incident-tracker-one.vercel.app",
+                                "http://el17491.int.corp",
+                                "http://el17491.int.corp:8081"
                         )
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
